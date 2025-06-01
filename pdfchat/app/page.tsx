@@ -55,7 +55,7 @@ export default function Home() {
             <div className="mx-auto max-w-7xl px-6 lg:px-16">
               <Image
               alt="App Screenshot"
-              src="https://i.imgur.com/VciRSTI.jpeg"
+              src="https://ik.imagekit.io/svk3515/Screenshot%202025-06-01%20123738.png?updatedAt=1748762354275"
               width={2432}
               height={1442}
               className="mb-[-0%] rounded-xl shadow-2xl ring-1 ring-gray-900/10"

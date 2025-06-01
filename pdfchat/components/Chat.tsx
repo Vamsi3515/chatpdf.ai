@@ -24,7 +24,6 @@ function  Chat({ id } : { id:string }) {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isPending, startTransition] = useTransition();
-  const messagesRef = useRef<Message[]>([]);
 
   const bottomOfChatRef = useRef<HTMLDivElement>(null);
   const [snapShot, loading, error] = useCollection(
@@ -42,17 +41,11 @@ function  Chat({ id } : { id:string }) {
   }, [error]);
 
   useEffect(() => {
-    messagesRef.current = messages;
-  }, [messages]);
-
-  useEffect(() => {
   if (!snapShot) return;
 
   console.log("Updated snapshot", snapShot.docs);
 
-  const currentMessages = [...messagesRef.current];
-
-  const lastMessage = currentMessages.pop();
+  const lastMessage = messages.pop();
 
   if (lastMessage?.role === "ai" && lastMessage.message === "Thinking...") {
     // Placeholder AI message — skip update
