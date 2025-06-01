@@ -1,15 +1,19 @@
 "use client";
 
+import useSubscription from '@/hooks/useSubscription';
 import useUpload, { Statustext } from '@/hooks/useUpload';
 import { CheckCircleIcon, CircleArrowDown, HammerIcon, RocketIcon, SaveIcon, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { JSX, useCallback, useEffect, useState } from 'react';
 import { Accept, useDropzone } from 'react-dropzone';
+import { toast } from 'sonner';
+import type { FileRejection } from 'react-dropzone';
 
 const FileUploader = () => {
   const [error, setError] = useState<string | null>(null);
   const { progress, status, fileId, handleUpload } = useUpload();
   const router = useRouter();
+  const { isOverFileLimit, filesLoading } = useSubscription();
 
   useEffect(() => {
     if(fileId){
@@ -24,14 +28,17 @@ const FileUploader = () => {
     const file = acceptedFiles[0];
 
     if(file){
-      await handleUpload(file);
-    }else{
-      //handle here
+      if(!isOverFileLimit && !filesLoading){
+        await handleUpload(file);
+      }else{
+        toast.error('You have reached maximum limit to your account. Please upgrade your plan incase of free user');
+      }
     }
 
-  }, []);
+  }, [isOverFileLimit, filesLoading, handleUpload]);
 
-  const onDropRejected = useCallback((fileRejections: any) => {
+  const onDropRejected = useCallback((fileRejections: FileRejection[]) => {
+    console.log(fileRejections??"");
     setError("Only PDF files are allowed!");
   }, []);
 
@@ -78,7 +85,7 @@ const FileUploader = () => {
             className={`radial-progress bg-indigo-300 text-white border-indigo-600 border-4  ${progress === 100 && "hidden"}`}
             role='progressbar'
             style={{
-              // @ts-ignore
+              // @ts-expect-error: radial-progress expects custom CSS vars
               "--value": progress,
               "--size": "12rem",
               "--thickness": "1.3rem"
@@ -88,11 +95,11 @@ const FileUploader = () => {
           </div>
 
           {
-            //@ts-ignore
+            // @ts-expect-error: status may temporarily be undefined
             statusIcons[status!]
           }
 
-          {/* @ts-ignore */}
+          {/*  @ts-expect-error: status might be undefined here as well */}
           <p className='text-indigo-600 animate-pulse'>{status}</p>
         </div>
       )}

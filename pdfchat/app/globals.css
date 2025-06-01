@@ -121,3 +121,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+.crown-icon{
+  height: 50px;
+  width: 50px;
+}

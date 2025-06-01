@@ -5,8 +5,8 @@ import { adminDb } from "@/firebaseAdmin";
 import { generateLangchainCompletion } from "@/lib/langchain";
 import { auth } from "@clerk/nextjs/server";
 
+const PRO_LIMIT = 20;
 const FREE_LIMIT = 3;
-const PRO_LIMIT = 100;
 
 export async function askQuestion(id: string, question: string) {
     auth.protect();
@@ -21,6 +21,23 @@ export async function askQuestion(id: string, question: string) {
     );
 
     //limit FREE/PRO users here
+    const userRef = await adminDb.collection("users").doc(userId!).get();
+    if (!userRef.data()?.hasActiveMembership) {
+        if (userMessages.length >= FREE_LIMIT) {
+            return {
+                success: false,
+                message: `Chat limit exceeded. You will need to switch to Premium Plan to continue!`
+            }
+        }
+    }
+    if (userRef.data()?.hasActiveMembership) {
+        if (userMessages.length >= PRO_LIMIT) {
+            return {
+                success: false,
+                message: `You have reached chat limit of ${PRO_LIMIT} questions per document!`
+            }
+        }
+    }
 
     const userMessage: Message = {
         role: "human",

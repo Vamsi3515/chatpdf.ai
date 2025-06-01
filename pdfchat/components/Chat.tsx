@@ -10,6 +10,7 @@ import { db } from '@/firebase';
 import { useCollection } from 'react-firebase-hooks/firestore';
 import { askQuestion } from '@/actions/askQuestion';
 import ChatMessage from './ChatMessage';
+import { toast } from 'sonner';
 
 export type Message = {
     id?: string;
@@ -18,11 +19,12 @@ export type Message = {
     createdAt: Date;
 };
 
-function Chat({ id } : { id:string }) {
+function  Chat({ id } : { id:string }) {
   const { user } = useUser();
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isPending, startTransition] = useTransition();
+  const messagesRef = useRef<Message[]>([]);
 
   const bottomOfChatRef = useRef<HTMLDivElement>(null);
   const [snapShot, loading, error] = useCollection(
@@ -33,32 +35,43 @@ function Chat({ id } : { id:string }) {
   );
 
   useEffect(() => {
-    if(!snapShot) return;
+  if (error) {
+    console.error("Firestore error:", error);
+    toast.error("Failed to load chat messages");
+  }
+  }, [error]);
 
-    console.log("Updated snapshot", snapShot.docs);
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
-    //get second last message to check if the AI is thinking
-    const lastMessage = messages.pop();
+  useEffect(() => {
+  if (!snapShot) return;
 
-    if(lastMessage?.role === "ai" && lastMessage.message === "Thinking..."){
-      //return as this is a dummy placeholder message
-      return;
-    }
+  console.log("Updated snapshot", snapShot.docs);
 
-    const newMessages = snapShot.docs.map(doc => {
-      const { role, message, createdAt } = doc.data();
+  const currentMessages = [...messagesRef.current];
 
-      return {
-        id: doc.id,
-        role,
-        message,
-        createdAt: createdAt.toDate(),
-      };
-    });
+  const lastMessage = currentMessages.pop();
 
-    setMessages(newMessages);
+  if (lastMessage?.role === "ai" && lastMessage.message === "Thinking...") {
+    // Placeholder AI message — skip update
+    return;
+  }
 
-  }, [snapShot]);
+  const newMessages = snapShot.docs.map(doc => {
+    const { role, message, createdAt } = doc.data();
+
+    return {
+      id: doc.id,
+      role,
+      message,
+      createdAt: createdAt.toDate(),
+    };
+  });
+
+  setMessages(newMessages);
+}, [snapShot]);
 
   useEffect(() => {
     bottomOfChatRef.current?.scrollIntoView({
@@ -93,7 +106,8 @@ function Chat({ id } : { id:string }) {
 
       if(!success){
         //toast...
-
+        toast.warning(message);
+        
         setMessages((prev) => prev.slice(0,prev.length-1).concat([
           {
             role: "ai",

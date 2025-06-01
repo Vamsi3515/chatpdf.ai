@@ -24,9 +24,17 @@ function PricingPage() {
   const handleUpgrade = () => {
     if(!user) return;
 
+    const primaryEmail = user.primaryEmailAddress?.toString();
+    const fullName = user.fullName;
+
+    if (!primaryEmail || !fullName) {
+      console.error("User is missing email or full name");
+      return;
+    }
+
     const userDetails: UserDetails = {
-      email: user.primaryEmailAddress?.toString()!,
-      name: user.fullName!,
+      email: primaryEmail,
+      name: fullName,
     };
 
     startTransition(async () => {

@@ -6,7 +6,7 @@ import { collection, doc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { useCollection, useDocument } from 'react-firebase-hooks/firestore';
 
-const PRO_LIMIT = 20;
+const PRO_LIMIT = 25;
 const FREE_LIMIT = 3;
 
 function useSubscription() {

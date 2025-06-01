@@ -3,6 +3,7 @@ import Link from 'next/link'
 import React from 'react'
 import { Button } from './ui/button'
 import { FilePlus2 } from 'lucide-react'
+import UpgradeButton from './UpgradeButton'
 
 const Header = () => {
   return (
@@ -14,14 +15,13 @@ const Header = () => {
         
         <SignedIn>
             <div className='flex items-center space-x-2 gap-2'>
-                <Button asChild variant="link" className='hidden md:flex'>
-                    <Link href="/dashboard/upgrade">Pricing</Link>
-                </Button>
 
                 <Button asChild variant="outline">
                     <Link href="/dashboard">My Documents</Link>
                 </Button>
 
+                <UpgradeButton />
+                
                 <Button asChild variant="outline" className='border-indigo-600'>
                     <Link href="/dashboard/upload">
                         <FilePlus2 className='text-indigo-600' />
